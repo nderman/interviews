@@ -6,6 +6,7 @@ using System.Net;
 using System.Web;
 using System.Web.Http;
 using Newtonsoft.Json;
+using Realmdigital_Interview.Models.Product;
 
 namespace Realmdigital_Interview.Controllers
 {
@@ -15,74 +16,21 @@ namespace Realmdigital_Interview.Controllers
         [Route("product")]
         public object GetProductById(string productId)
         {
-            string response = "";
+            var product = new Product();
 
-            using (var client = new WebClient())
-            {
-                client.Headers[HttpRequestHeader.ContentType] = "application/json";
-                response = client.UploadString("http://192.168.0.241/eanlist?type=Web", "POST", "{ \"id\": \"" + productId + "\" }");
-            }
-            var reponseObject = JsonConvert.DeserializeObject<List<ApiResponseProduct>>(response);
+            var result = Product.GetById(productId);
 
-            var result = new List<object>();
-            for (int i = 0; i < reponseObject.Count; i++)
-            {
-                var prices = new List<object>();
-                for (int j = 0; j < reponseObject[i].PriceRecords.Count; j++)
-                {
-                    if (reponseObject[i].PriceRecords[j].CurrencyCode == "ZAR")
-                    {
-                        prices.Add(new
-                        {
-                            Price = reponseObject[i].PriceRecords[j].SellingPrice,
-                            Currency = reponseObject[i].PriceRecords[j].CurrencyCode
-                        });
-                    }
-                }
-                result.Add(new
-                {
-                    Id = reponseObject[i].BarCode,
-                    Name = reponseObject[i].ItemName,
-                    Prices = prices
-                });
-            }
             return result.Count > 0 ? result[0] : null;
         }
 
         [Route("product/search")]
         public List<object> GetProductsByName(string productName)
         {
-            string response = "";
+            var product = new Product();
 
-            using (var client = new WebClient())
-            {
-                client.Headers[HttpRequestHeader.ContentType] = "application/json";
-                response = client.UploadString("http://192.168.0.241/eanlist?type=Web", "POST", "{ \"names\": \"" + productName + "\" }");
-            }
-            var reponseObject = JsonConvert.DeserializeObject<List<ApiResponseProduct>>(response);
+            var result = Product.GetByName(productName);
 
-            var result = new List<object>();
-            for (int i = 0; i < reponseObject.Count; i++)
-            {
-                var prices = new List<object>();
-                for (int j = 0; j < reponseObject[i].PriceRecords.Count; j++)
-                {
-                    if (reponseObject[i].PriceRecords[j].CurrencyCode == "ZAR")
-                    {
-                        prices.Add(new
-                        {
-                            Price = reponseObject[i].PriceRecords[j].SellingPrice,
-                            Currency = reponseObject[i].PriceRecords[j].CurrencyCode
-                        });
-                    }
-                }
-                result.Add(new
-                {
-                    Id = reponseObject[i].BarCode,
-                    Name = reponseObject[i].ItemName,
-                    Prices = prices
-                });
-            }
+            return result.Count > 0 ? result[0] : null;
             return result;
         }
     }
